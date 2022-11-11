@@ -81,4 +81,12 @@ def login(login: Login):
         if user:
             return {"status": "true", "message": "Login successful."}
         else:
-            return {"status": "false", "message": "Incorrect password."}    
+            return {"status": "false", "message": "Incorrect password."}
+
+
+@app.get("/getallusers/")
+def get_all_users():
+    global database
+    users = database.fetch("SELECT * FROM users;")
+    users = [{"id": user[0], "email": user[1], "full name": user[2], "phone number": user[3]} for user in users]
+    return {"status": "true", "result": users}
