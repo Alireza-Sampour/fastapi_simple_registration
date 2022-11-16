@@ -81,7 +81,7 @@ def login(login: Login):
         else:
             user = database.fetch_one("SELECT * FROM users WHERE phone_number = %s AND `password` = %s;", (login.phone_number, hashed_password))
         if user:
-            return {"status": "true", "message": "Login successful.", "id": user[0], "email": user[1], "full name": user[2], "phone number": user[3]}
+            return {"status": "true", "message": "Login successful.", "id": user[0], "email": user[1], "full_name": user[2], "phone_number": user[3]}
         else:
             return {"status": "false", "message": "Incorrect password."}
 
