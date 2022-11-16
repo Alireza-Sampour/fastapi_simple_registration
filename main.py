@@ -1,7 +1,9 @@
 import hashlib
 
+from os import getcwd
 from typing import Union
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import Response, JSONResponse
 from pydantic import BaseModel
 from db import DB
 
@@ -25,7 +27,7 @@ class Login(BaseModel):
 
 @app.on_event("startup")
 def setup():
-    print(">>> Creating db tables...")
+    print(">>> Checking db tables...")
     global database
     database = DB()
     database.execute("CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, email VARCHAR(255), full_name VARCHAR(255), phone_number VARCHAR(255), `password` VARCHAR(255));")
@@ -79,7 +81,7 @@ def login(login: Login):
         else:
             user = database.fetch_one("SELECT * FROM users WHERE phone_number = %s AND `password` = %s;", (login.phone_number, hashed_password))
         if user:
-            return {"status": "true", "message": "Login successful."}
+            return {"status": "true", "message": "Login successful.", "id": user[0], "email": user[1], "full name": user[2], "phone number": user[3]}
         else:
             return {"status": "false", "message": "Incorrect password."}
 
@@ -90,3 +92,17 @@ def get_all_users():
     users = database.fetch("SELECT * FROM users;")
     users = [{"id": user[0], "email": user[1], "full name": user[2], "phone number": user[3]} for user in users]
     return {"status": "true", "result": users}
+
+
+@app.get("/images/food/{file_name}")
+def get_image_food(request: Request):
+    try:
+        response = Response(content=open(f"{getcwd()}{request.url.path}", "rb").read())
+        return response
+    except FileNotFoundError:
+        return JSONResponse(content={"status": False, "message": "Image not found!"}, status_code=404)
+
+
+@app.get("get_food_recipe/{food_name}")
+def get_food_recipe(food_name: str):
+    pass
